@@ -1,0 +1,156 @@
+component n_isoradial_channel
+    nodes
+        I = C_uF.C_uF;          % +:top
+        O = C_uF.C_uF;          % -:bottom
+    end
+    inputs
+        f = {0,'Hz'};           % f:top
+        inlet = {0, '1'};      % in:top
+    end
+    outputs
+        outlet = {0, '1'};  % out:bottom
+    end
+    variables
+        q = {0, 'mm^3/s'};
+        f_dot = {0,'Hz/s'};
+        p = {0, 'Pa'};
+        fill = {0, '1'};
+        V_liquid = {0, 'mm^3'};
+        InO = {0, '1'};
+        p_IRRF = {0,'Pa'};
+        p_Euler = {0,'Pa'};
+        p_visc = {0,'Pa'};
+        p_cap = {0,'Pa'};
+        wet = {0,'1'};
+    end
+    parameters
+        w = {106, 'um'};
+        d = {100, 'um'};
+        l = {100,'mm'};
+        r = {20, 'mm'};
+        init_fill = {0, '1'};
+        theta = {pi/2,'1'};
+    end
+    parameters (Access = private)
+        V_total = {0, 'mm^3'};
+        Area = {1,'mm^2'};
+        fluidic_res_liq = {0,'Pa*s/mm^3'};
+        fluidic_res_air = {0,'Pa*s/mm^3'};
+        gamma_lg = {0.07275,'Pa*m'};
+    end
+    function setup
+        across(p,I.p,O.p);
+        through(q,I.q,O.q);
+        V_total = w*d*l;
+        Area = w*d;
+        fluidic_res_liq = 28.4*O.viscosity*l/(w^2*d^2);
+        fluidic_res_air = 28.4*O.viscosity_air*l/(w^2*d^2);
+        InO = -1;
+        if (init_fill >= 1) || (init_fill <= -1)
+            fill = 1;
+            V_liquid = V_total;
+        elseif init_fill > 0
+            fill = init_fill;
+            V_liquid = init_fill*V_total;
+        elseif init_fill == 0
+            fill = 0;
+            V_liquid = 0;
+        else
+            fill = -init_fill;
+            V_liquid = -init_fill*V_total;
+        end
+    end
+    equations
+        fill == V_liquid/V_total;
+        if (InO<0) && ((init_fill>0) && (init_fill<1)) || ((init_fill<0) && (init_fill>-1))
+            % Init channel partially filled
+            if inlet < 0
+                V_liquid.der == 0;
+                InO == -1;
+            else
+                V_liquid.der == -q;
+                InO == 2;
+            end
+            wet == 2;
+            outlet == -1;
+        elseif (InO<0) && ((init_fill>=1) || (init_fill<=-1))
+            % Init channel completely filled
+            V_liquid.der == 0;
+            outlet == 2;
+            wet == 2;
+            if inlet > 1
+                InO == 2;
+            else
+                InO == -1;
+            end
+        elseif (InO<0) && (init_fill == 0)
+            % Init channel empty
+            V_liquid.der==0;
+            outlet == -1;
+            wet == -1;
+            if inlet > 1
+                InO == 2;
+            else
+                InO == -1;
+            end
+        elseif (InO>1) && (inlet<0) && (wet<0) && (fill<=0)
+            % Continious empty
+            V_liquid.der == 0;
+            wet == -1;
+            outlet == -1;
+            InO == 2;
+        elseif (InO>1) && (inlet>1) && (q<=0) && (fill<=0)
+            % Transition start fill
+            V_liquid.der == -q;
+            outlet == -1;
+            wet == 2;
+            InO == 2;
+        elseif (InO>1) && (inlet>1) && (q>0) && (fill <=0)
+            % Transition last moment empty towards top
+            V_liquid.der == 0;
+            outlet == -1;
+            wet == -1;
+            InO == 2;
+        elseif (InO>1) && (inlet>1) && (fill<1) && (fill>0)
+            % Continious case: liquid level changes filled
+            V_liquid.der == -q
+            outlet == -1;
+            wet == 2;
+            InO == 2;
+        elseif (InO>1) && (inlet>1) && (q<=0) && (fill>=1)
+            % Transition case: last moment of filling
+            V_liquid.der == 0;
+            outlet == 2;
+            wet == 2;
+            InO==2;
+        elseif (InO>1) && (inlet>1) && (fill>=1) && (q<=0)
+            % Continious case: Channel completely filled
+            V_liquid.der == 0;
+            outlet == 2;
+            wet == 2;
+            InO == 2;
+        elseif (InO>1) && (inlet>1) && (q>0) && (fill>=1)
+            % Transition case: Start defilling towards inlet
+            V_liquid.der == q;
+            wet == 2;
+            outlet == -1;
+            InO == 2;
+        elseif (InO>1) && (inlet<0) && (fill>0)
+            V_liquid.der == q;
+            outlet == 2;
+            wet == 2;
+            InO == 2;
+        else %(InO>1) && (inlet<0) && (fill<=0)
+            V_liquid.der == 0;  
+            outlet == -1;
+            wet == -1;
+            InO == 2;
+        end
+        f.der == f_dot;
+        p_IRRF == l*(r*(2*pi*f)^2)*(fill*O.density+(1-fill)*O.density_gas);
+        p_Euler == -(O.density*fill + O.density_gas*(1-fill))*l*r*2*pi*f_dot;
+        p_cap == gamma_lg*(((2*cos(theta))/w)+((2*cos(theta))/d));
+        p_visc == (fill*fluidic_res_liq + (1-fill)*fluidic_res_air)*q;
+        p + p_Euler + p_cap == p_visc + p_IRRF;
+    end
+end

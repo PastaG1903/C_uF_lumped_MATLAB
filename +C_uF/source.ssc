@@ -1,0 +1,17 @@
+component source
+% Source
+    nodes
+        O = C_uF.C_uF;              % -:bottom
+    end
+    variables
+        q = {0,'mm^3/s'};
+        p = {0,'Pa'};
+    end
+    function setup
+        through(q,O.q,[]);
+        across(p,O.p,[]);
+    end
+    equations
+        O.p == 0;
+    end
+end

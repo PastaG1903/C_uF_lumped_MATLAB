@@ -1,0 +1,266 @@
+component n_radial_channel
+    nodes
+        I = C_uF.C_uF;          
+        O = C_uF.C_uF;          
+    end
+    inputs
+        f = {0,'Hz'};           
+        inlet = {0, '1'};      
+        revIn = {0, '1'};       
+    end
+    outputs
+        outlet = {0, '1'};  
+        revOut = {0, '1'};  
+    end
+    annotations
+        revIn : Side = right;
+        revOut : Side = right;
+        I : Side = top;
+        O : Side = bottom;
+        f : Side = top;
+        inlet : Side = top;
+        outlet : Side = bottom;
+    end
+    variables
+        q = {0, 'mm^3/s'};
+        q_dot = {0, 'mm^3/s^2'};
+        p = {0, 'Pa'};
+        fill = {0, '1'};
+        V_liquid = {0, 'mm^3'};
+        InO = {0, '1'};
+        p_IRRF = {0,'Pa'};
+        p_cent = {0,'Pa'};
+        p_visc = {0,'Pa'};
+        p_cap = {0,'Pa'};
+        wet = {0,'1'};
+        % C_cap_fill = {0,'1'};
+    end
+    parameters
+        w = {106, 'um'};
+        d = {100, 'um'};
+        r_in = {20, 'mm'};
+        r_out = {30, 'mm'};
+        init_fill = {0, '1'};
+        theta = {pi/2,'1'};
+    end
+    parameters (Access = private)
+        V_total = {0, 'mm^3'};
+        l = {1, 'mm'};
+        Area = {1,'mm^2'};
+        fluidic_res_liq = {0,'Pa*s/mm^3'};
+        fluidic_res_air = {0,'Pa*s/mm^3'};
+        gamma_lg = {0.07275,'Pa*m'};
+    end
+    function setup
+        across(p,I.p,O.p);
+        through(q,I.q,O.q);
+        l = abs(r_out - r_in);
+        V_total = w*d*l;
+        Area = w*d;
+        fluidic_res_liq = 28.4*O.viscosity*l/(w^2*d^2);
+        fluidic_res_air = 28.4*O.viscosity_air*l/(w^2*d^2);
+        InO = -1;
+        if (init_fill >= 1) || (init_fill <= -1)
+            fill = 1;
+            V_liquid = V_total;
+        elseif init_fill > 0
+            fill = init_fill;
+            V_liquid = init_fill*V_total;
+        elseif init_fill == 0
+            fill = 0;
+            V_liquid = 0;
+        else
+            fill = -init_fill;
+            V_liquid = -init_fill*V_total;
+        end
+    end
+    equations
+        fill == V_liquid/V_total;
+        % INITIALIZATION CONDITIONS
+        if (InO<0) && (init_fill>0) && (init_fill<1)
+            % Init channel partially filled from inlet
+            if inlet>1
+                V_liquid.der == abs(q);
+            else
+                V_liquid.der == 0;
+            end
+            outlet == -1;
+            wet == 2;
+            revOut == -1;
+            InO == 2;
+        elseif (InO<0) && (init_fill<0) && (init_fill>-1)
+            % Init channel partially filled form outlet
+            if revIn>1
+                V_liquid.der == abs(q);
+            else
+                V_liquid.der == 0;
+            end
+            outlet == 2;
+            wet == 2;
+            revOut == 2;
+            InO == 2;
+        elseif (InO<0) && (init_fill == 0)
+            %Init channel empty
+            V_liquid.der == 0;
+            outlet == -1;
+            wet == -1;
+            revOut == -1;
+            InO == 2;
+        elseif (InO<0) && (init_fill == 1)
+            % Init channel full
+            V_liquid.der == 0;
+            outlet == 2;
+            wet == 2;
+            revOut == -1;
+            InO == 2;
+
+        % CONDITIONS FROM INLET
+        elseif (InO>1) && (fill == 0) && (q>0) && (inlet>1)
+            % starts filling
+            V_liquid.der == abs(q);
+            outlet == -1;
+            wet == 2;
+            revOut == -1;
+            InO == 2;
+        elseif (InO>1) && (fill>0) && (inlet>1) && (q>0) && (fill<1)
+            % volume changes filling
+            V_liquid.der == abs(q);
+            outlet == -1;
+            wet == 2;
+            revOut == -1;
+            InO == 2;
+        elseif (InO>1) && (fill>=1) && (q>0) && (inlet>1)
+            % last moment filling
+            V_liquid.der == 0;
+            outlet == 2;
+            wet == 2;
+            revOut == -1;
+            InO == 2;
+        elseif (InO>1) && (fill>=1) && (inlet<0) && (q>0) && (revIn<0)
+            % starts defilling
+            V_liquid.der == -abs(q);
+            outlet == 2;
+            wet == 2;
+            revOut == -1;
+            InO == 2;
+        elseif (InO>1) && (fill>0) && (fill<1) && (q>0) && (inlet<0) && (revIn<0)
+            % volume changes defilling
+            V_liquid.der == -abs(q);
+            outlet == 2;
+            wet == 2;
+            revOut == -1;
+            InO == 2;
+        elseif (InO>1) && (fill<=0) && (q>0) && (inlet<0) && (revIn<0)
+            % last moment defilling
+            V_liquid.der == 0;
+            outlet == -1;
+            wet == -1;
+            revOut == -1;
+            InO == 2;
+
+        %CONDITIONS FROM OUTLET
+        elseif (InO>1) && (fill<=0) && (q<0) && (revIn>1)
+            % starts filling
+            V_liquid.der == abs(q);
+            outlet == -1;
+            wet == 2;
+            revOut == -1;
+            InO == 2;
+        elseif (InO>1) && (fill>0) && (revIn>1) && (q<0) && (fill<1)
+            % volume changes filling
+            V_liquid.der == abs(q);
+            outlet == -1;
+            wet == 2;
+            revOut == -1
+            InO == 2;
+        elseif (InO>1) && (fill>=1) && (q<0) && (revIn>1)
+            % last moment filling
+            V_liquid.der == 0;
+            outlet == -1;
+            wet == 2;
+            revOut == 2;
+            InO == 2;
+        elseif (InO>1) && (fill>=1) && (revIn<0) && (q<0)
+            % starts defilling
+            V_liquid.der == -abs(q);
+            outlet == -1;
+            wet == 2;
+            revOut == 2;
+            InO == 2;
+        elseif (InO>1) && (fill>0) && (fill<1) && (q<0) && (revIn<0)
+            % volume changes defilling
+            V_liquid.der == -abs(q);
+            outlet == -1;
+            wet == 2;
+            revOut == 2;
+            InO == 2;
+        elseif (InO>1) && (fill<=0) && (q<0) && (inlet<0) && (revIn<0)
+            % last moment defilling
+            V_liquid.der == 0;
+            outlet == -1;
+            wet == -1;
+            revOut == -1;
+            InO == 2;
+        % CONTINUOUS CONDITIONS
+        elseif (InO>1) && (fill>=1) && (((inlet>1) && (q>0)) || ((revIn>1) && (q<0)))
+            % full
+            V_liquid.der == 0;
+            wet == 2;
+            InO == 2;
+            if ((inlet>1) && (q>0))
+                outlet == 2;
+                revOut == -1;
+            elseif ((revIn>1) && (q<0))
+                outlet == -1;
+                revOut == 2;
+            else
+                outlet == -1;
+                revOut == -1;
+            end
+        else
+            V_liquid.der == 0;
+            outlet == -1;
+            wet == -1;
+            revOut == -1;
+            InO == 2;            
+        end
+
+        q.der == q_dot;
+
+        if fill <= 0
+            p_visc == fluidic_res_air*q;
+            p_IRRF == l*q_dot*O.density_gas/Area;
+            if r_in<r_out
+                p_cent == O.density_gas/2*(2*pi*f)^2*(r_out^2-r_in^2);
+            else
+                p_cent == O.density_gas/2*(2*pi*f)^2*(r_in^2-r_out^2);
+            end
+            p_cap == 0;
+        elseif fill >= 1
+            p_visc == fluidic_res_liq*q;
+            p_IRRF == l*q_dot*O.density/Area;
+            if r_in<r_out
+                p_cent == O.density/2*(2*pi*f)^2*(r_out^2-r_in^2);
+            else
+                p_cent == O.density/2*(2*pi*f)^2*(r_in^2-r_out^2);
+            end
+            p_cap == 0;
+        else
+            p_visc == (fill*fluidic_res_liq + (1-fill)*fluidic_res_air)*q;
+            p_IRRF == l*q_dot*(fill*O.density+(1-fill)*O.density_gas)/Area;
+            p_cap == gamma_lg*(((2*cos(theta))/w)+((2*cos(theta))/d));
+
+            if (inlet > 1) && (r_in < r_out)
+                p_cent == O.density/2*(2*pi*f)^2*((r_in+l*fill)^2-r_in^2) + O.density_gas/2*(2*pi*f)^2*(r_out^2-(r_in+l*fill)^2);
+            elseif (inlet < 0) && (r_in < r_out)
+                p_cent == O.density/2*(2*pi*f)^2*(r_out^2-(r_out-l*fill)^2) + O.density_gas/2*(2*pi*f)^2*((r_out-l*fill)^2-r_in^2);
+            elseif (inlet > 1) && (r_in > r_out)
+                p_cent == O.density/2*(2*pi*f)^2*(r_in^2-(r_in-l*fill)^2) + O.density_gas/2*(2*pi*f)^2*((r_in-l*fill)^2-r_out^2);
+            else %(inlet > 1) && (r_in > r_out)
+                p_cent == O.density/2*(2*pi*f)^2*((r_out+l*fill)^2-r_out^2) + O.density_gas/2*(2*pi*f)^2*(r_in^2-(r_out+l*fill)^2);
+            end
+        end
+        
+        p + p_cent + p_cap == p_IRRF + p_visc;
+    end
+end

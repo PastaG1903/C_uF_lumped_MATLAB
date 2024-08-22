@@ -1,0 +1,14 @@
+domain C_uF
+     variables
+         p = {1,'Pa'};                      % Pressure
+     end
+     variables(Balancing = true)
+         q = {1,'mm^3/s'};                  % Flow rate
+     end
+     parameters
+         density = {1000,'kg/m^3'};         % Liquid density
+         viscosity = {0.0010005,'Pa*s'};           % Liquid viscosity
+         viscosity_air = {0.00001813,'Pa*s'}
+         density_gas = {1.192, 'kg/m^3'}
+     end
+end
