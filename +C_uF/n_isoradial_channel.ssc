@@ -114,7 +114,7 @@ component n_isoradial_channel
             InO == 2;
 
         % CONDITIONS FROM INLET
-        elseif (InO>1) && (fill == 0) && (q>0) && (inlet>1)
+        elseif (InO>1) && (fill<1) && (q>0) && (inlet>1)
             % starts filling
             V_liquid.der == abs(q);
             outlet == -1;
