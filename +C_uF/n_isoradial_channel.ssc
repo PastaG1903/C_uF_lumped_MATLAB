@@ -23,6 +23,7 @@ component n_isoradial_channel
     end
     variables
         q = {0, 'mm^3/s'};
+        q_dot = {0, 'mm^3/s^2'};
         f_dot = {0,'Hz/s'};
         p = {0, 'Pa'};
         fill = {0, '1'};
@@ -223,7 +224,8 @@ component n_isoradial_channel
             InO == 2;            
         end
         f.der == f_dot;
-        p_IRRF == l*(r*(2*pi*f)^2)*(fill*O.density+(1-fill)*O.density_gas);
+        q.der == q_dot;
+        p_IRRF == l*q_dot*(fill*O.density+(1-fill)*O.density_gas)/Area;
         p_Euler == -(O.density*fill + O.density_gas*(1-fill))*l*r*2*pi*f_dot*dir;
         p_cap == gamma_lg*(((2*cos(theta))/w)+((2*cos(theta))/d));
         p_visc == (fill*fluidic_res_liq + (1-fill)*fluidic_res_air)*q;

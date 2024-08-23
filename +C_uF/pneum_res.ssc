@@ -35,7 +35,6 @@ component pneum_res
         V_total = {0,'mm^3'};
         l = {10,'mm'};
         dist_to_cent = {10,'mm'};
-        theta = {pi/2,'1'};
     end
     parameters (Access = private)
         r = {0,'mm'};
@@ -79,7 +78,7 @@ component pneum_res
         h_liquid == abs(l)*fill;
         p_cent == 0.5*I.density_gas*(r^2-(r-h_liquid)^2)*(2*pi*f)^2 + 0.5*I.density*((r-h_liquid)^2-dist_to_cent^2)*(2*pi*f)^2
         if V_liquid > 0
-            p_pneum == p0*(V_total/(V_total-V_liquid))-p0 +p_vap;
+            p_pneum == p0*(V_total/(V_total-V_liquid))-p0;
             if f_dot > 0
                 if fill > Euler_fill
                     p_Euler.der == EP*(-(G-1)*0.5*(I.density*w*2*pi*r)*f_dot-p_Euler);
