@@ -38,7 +38,7 @@ component pneum_res
     end
     parameters (Access = private)
         r = {0,'mm'};
-        p0 = {1,'atm'};
+        p0 = {101325,'Pa'};
         Euler_fill = {0.1,'1'};
         EP = {100,'1/s'};
         % fluidic_res_liq = {0,'Pa*s/mm^3'};
@@ -78,7 +78,7 @@ component pneum_res
         h_liquid == abs(l)*fill;
         p_cent == 0.5*I.density_gas*(r^2-(r-h_liquid)^2)*(2*pi*f)^2 + 0.5*I.density*((r-h_liquid)^2-dist_to_cent^2)*(2*pi*f)^2
         if V_liquid > 0
-            p_pneum == p0*(V_total/(V_total-V_liquid))-p0;
+            p_pneum == p0*(V_total/(V_total-V_liquid))-p0 +p_vap;
             if f_dot > 0
                 if fill > Euler_fill
                     p_Euler.der == EP*(-(G-1)*0.5*(I.density*w*2*pi*r)*f_dot-p_Euler);

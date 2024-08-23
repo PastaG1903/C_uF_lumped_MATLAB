@@ -221,7 +221,7 @@ component n_radial_channel
             outlet == -1;
             wet == -1;
             revOut == -1;
-            InO == 2;            
+            InO == 2;
         end
 
         q.der == q_dot;

@@ -39,7 +39,7 @@ component vented_chamber
     end
     parameters (Access = private)
         r = {0,'mm'};
-        p0 = {1,'atm'};
+        p0 = {101325,'Pa'};
         Euler_fill = {0.1,'1'};
         EP = {100,'1/s'};
         % fluidic_res_liq = {0,'Pa*s/mm^3'};
