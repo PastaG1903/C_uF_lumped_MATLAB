@@ -48,7 +48,7 @@ component pneum_res
         d = {0,'mm'};
         w = {0,'mm'};
         Area = {1,'mm^2'};
-        p_vap = {15880.002396752,'Pa'};
+        p_vap = {2329.575349457,'Pa'};
     end
     function setup
         across(p,I.p);
@@ -79,7 +79,7 @@ component pneum_res
         h_liquid == abs(l)*fill;
         p_cent == 0.5*I.density_gas*(r^2-(r-h_liquid)^2)*(2*pi*f)^2 + 0.5*I.density*((r-h_liquid)^2-dist_to_cent^2)*(2*pi*f)^2
         if V_liquid > 0
-            p_pneum == p0*(V_total/(V_total-V_liquid))-p0 ;
+            p_pneum == p0*(V_total/(V_total-V_liquid))-p0 +p_vap;
             if f_dot > 0
                 if fill > Euler_fill
                     p_Euler.der == EP*(-(G-1)*0.5*(I.density*w*2*pi*r)*f_dot-p_Euler);

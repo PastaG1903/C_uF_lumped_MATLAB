@@ -33,7 +33,6 @@ component n_radial_channel
         p_visc = {0,'Pa'};
         p_cap = {0,'Pa'};
         wet = {0,'1'};
-        % C_cap_fill = {0,'1'};
     end
     parameters
         w = {106, 'um'};
@@ -115,7 +114,7 @@ component n_radial_channel
             InO == 2;
 
         % CONDITIONS FROM INLET
-        elseif (InO>1) && (fill == 0) && (q>0) && (inlet>1)
+        elseif (InO>1) && (fill<1) && (q>0) && (inlet>1)
             % starts filling
             V_liquid.der == abs(q);
             outlet == -1;
@@ -159,7 +158,7 @@ component n_radial_channel
             InO == 2;
 
         %CONDITIONS FROM OUTLET
-        elseif (InO>1) && (fill<=0) && (q<0) && (revIn>1)
+        elseif (InO>1) && (fill<1) && (q<0) && (revIn>1)
             % starts filling
             V_liquid.der == abs(q);
             outlet == -1;
