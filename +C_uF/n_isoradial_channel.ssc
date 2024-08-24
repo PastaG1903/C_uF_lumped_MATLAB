@@ -224,11 +224,23 @@ component n_isoradial_channel
             InO == 2;            
         end
         f.der == f_dot;
-        q.der == q_dot;
-        p_IRRF == l*q_dot*(fill*O.density+(1-fill)*O.density_gas)/Area;
-        p_Euler == -(O.density*fill + O.density_gas*(1-fill))*l*r*2*pi*f_dot*dir;
-        p_cap == gamma_lg*(((2*cos(theta))/w)+((2*cos(theta))/d));
-        p_visc == (fill*fluidic_res_liq + (1-fill)*fluidic_res_air)*q;
+        q.der == q_dot; 
+        if fill <= 0
+          p_IRRF == l*q_dot*O.density_gas/Area;
+          p_Euler == -O.density_gas*l*r*2*pi*f_dot*dir;
+          p_visc == fluidic_res_air*q;
+          p_cap == 0;
+        elseif fill>=1
+          p_IRRF == l*q_dot*O.density/Area;
+          p_Euler == -O.density*l*r*2*pi*f_dot*dir;
+          p_visc == fluidic_res_liq*q;
+          p_cap == 0;
+        else
+          p_IRRF == l*q_dot*(fill*O.density+(1-fill)*O.density_gas)/Area;
+          p_Euler == -(O.density*fill + O.density_gas*(1-fill))*l*r*2*pi*f_dot*dir;
+          p_visc == (fill*fluidic_res_liq + (1-fill)*fluidic_res_air)*q;
+          p_cap == gamma_lg*(((2*cos(theta))/w)+((2*cos(theta))/d));
+        end
         p + p_Euler + p_cap == p_visc + p_IRRF;
     end
 end

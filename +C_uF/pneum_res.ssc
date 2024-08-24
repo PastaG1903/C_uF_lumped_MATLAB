@@ -18,15 +18,12 @@ component pneum_res
     variables
         p = {0,'Pa'};
         q = {0,'mm^3/s'};
-        % q_dot = {0, 'mm^3/s^2'};
         h_liquid = {0,'mm'};
         p_cent = {0,'Pa'};
         f_dot = {0,'Hz/s'};
         p_Euler = {0,'Pa'};
         V_liquid = {0,'mm^3'};
         fill = {0,'1'};
-        % p_visc = {0,'Pa'};
-        % p_IRRF = {0,'Pa'};
         p_pneum = {0,'Pa'};
     end
     parameters
@@ -41,9 +38,6 @@ component pneum_res
         p0 = {101325,'Pa'};
         Euler_fill = {0.1,'1'};
         EP = {100,'1/s'};
-        % fluidic_res_liq = {0,'Pa*s/mm^3'};
-        % fluidic_res_air = {0,'Pa*s/mm^3'};
-        gamma_lg = {0.07275,'Pa*m'};
         d = {0,'mm'};
         w = {0,'mm'};
         Area = {1,'mm^2'};
@@ -54,8 +48,6 @@ component pneum_res
         through(q,I.q);
         d = sqrt(V_total/abs(l));
         w = sqrt(V_total/abs(l));
-        % fluidic_res_liq = 28.4*I.viscosity*abs(l)/(Area^2);
-        % fluidic_res_air = 28.4*I.viscosity_air*abs(l)/(Area^2);
         Area = w*d;
         r = l+dist_to_cent;
         if init_fill >=1
@@ -70,9 +62,6 @@ component pneum_res
         end
     end
     equations
-        % q.der == q_dot;
-        % p_IRRF == abs(l)*q_dot/Area*(fill*I.density+(1-fill)*I.density_gas);
-        % p_visc == (fill*fluidic_res_liq + (1-fill)*fluidic_res_air)*q;
         fill == V_liquid/V_total;
         f.der == f_dot;
         h_liquid == abs(l)*fill;
@@ -115,10 +104,6 @@ component pneum_res
             revOut == -1;
         end
         p + p_cent + p_Euler == p_pneum ;
-        % p + p_cent + p_Euler == p_IRRF + p_visc + p_pneum ;
-        % p == p_pneum - p_cent - p_Euler;
-        % p - p_cent - p_Euler == -p_IRRF - p_visc - p_pneum;
-        % p + p_cent == p_pneum;
 
     end
 end
