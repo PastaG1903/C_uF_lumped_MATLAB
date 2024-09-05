@@ -36,12 +36,12 @@ component n_isoradial_channel
         wet = {0,'1'};
     end
     parameters
-        w = {106, 'um'};
-        d = {100, 'um'};
-        l = {100,'mm'};
-        r = {20, 'mm'};
-        init_fill = {0, '1'};
-        theta = {pi/2,'1'};
+        w = {106, 'um'}; %Width
+        d = {100, 'um'}; %Depth
+        l = {100,'mm'}; %Length
+        r = {20, 'mm'}; %Radial distance to channel
+        init_fill = {0, '1'}; %Initial fill level
+        theta = {pi/2,'1'}; %Contact angle
         dir = {0,'1'};
     end
     parameters (Access = private)
@@ -241,6 +241,13 @@ component n_isoradial_channel
           p_visc == (fill*fluidic_res_liq + (1-fill)*fluidic_res_air)*q;
           p_cap == gamma_lg*(((2*cos(theta))/w)+((2*cos(theta))/d));
         end
+        
+        % if revIn > 0
+          % p + p_Euler + p_visc + p_IRRF == p_cap;
+        % else
+          % p + p_Euler + p_cap == p_visc + p_IRRF;
+        % end
+
         p + p_Euler + p_cap == p_visc + p_IRRF;
     end
 end

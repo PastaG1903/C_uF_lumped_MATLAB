@@ -35,12 +35,12 @@ component n_radial_channel
         wet = {0,'1'};
     end
     parameters
-        w = {106, 'um'};
-        d = {100, 'um'};
-        r_in = {20, 'mm'};
-        r_out = {30, 'mm'};
-        init_fill = {0, '1'};
-        theta = {pi/2,'1'};
+        w = {106, 'um'}; %Width
+        d = {100, 'um'}; %Depth
+        r_in = {20, 'mm'}; %Distance to inlet
+        r_out = {30, 'mm'}; %Distance to outlet
+        init_fill = {0, '1'}; %Initial fill level
+        theta = {pi/2,'1'}; %Contact angle
     end
     parameters (Access = private)
         V_total = {0, 'mm^3'};
@@ -259,6 +259,11 @@ component n_radial_channel
                 p_cent == O.density/2*(2*pi*f)^2*((r_out+l*fill)^2-r_out^2) + O.density_gas/2*(2*pi*f)^2*(r_in^2-(r_out+l*fill)^2);
             end
         end
+        % if revIn > 0
+          % p + p_cent + p_IRRF + p_visc == p_cap;
+        % else
+          % p + p_cent + p_cap == p_IRRF + p_visc;
+        % end
         
         p + p_cent + p_cap == p_IRRF + p_visc;
     end
