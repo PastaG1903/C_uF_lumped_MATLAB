@@ -123,7 +123,7 @@ component mem_pneum_res
         end
 
         if l>0
-          p + p_cent + p_Euler == p_mem + p_pneum;
+          p + p_cent + p_Euler + p_cap == p_mem + p_pneum;
         else
           p == p_pneum + p_cent + p_Euler + p_mem;
         end
