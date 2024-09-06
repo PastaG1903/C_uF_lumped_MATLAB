@@ -27,29 +27,28 @@ component pneum_res
         p_pneum = {0,'Pa'};
     end
     parameters
-        G = {0,'1'};
-        init_fill = {0,'1'};
-        V_total = {0,'mm^3'};
-        l = {10,'mm'};
-        dist_to_cent = {10,'mm'};
+        G = {0,'1'}; %Azimuthal position of the outlet
+        init_fill = {0,'1'}; %Initial fill
+        d = {0,'mm'}; %Depth
+        w = {0,'mm'}; %Width
+        l = {10,'mm'}; %Length
+        dist_to_cent = {10,'mm'}; %Distance to center
     end
     parameters (Access = private)
         r = {0,'mm'};
         p0 = {101325,'Pa'};
         Euler_fill = {0.1,'1'};
         EP = {100,'1/s'};
-        d = {0,'mm'};
-        w = {0,'mm'};
+        V_total = {0,'mm^3'};
         Area = {1,'mm^2'};
         p_vap = {2329.575349457,'Pa'};
     end
     function setup
         across(p,I.p);
         through(q,I.q);
-        d = sqrt(V_total/abs(l));
-        w = sqrt(V_total/abs(l));
         Area = w*d;
-        r = l+dist_to_cent;
+        V_total = w*d*abs(l);
+        r = abs(l)+dist_to_cent;
         if init_fill >=1
             fill = 1;
             V_liquid = V_total;
