@@ -25,6 +25,7 @@ component pneum_res
         V_liquid = {0,'mm^3'};
         fill = {0,'1'};
         p_pneum = {0,'Pa'};
+        p_cap = {0,'Pa'};
     end
     parameters
         G = {0,'1'}; %Azimuthal position of the outlet
@@ -33,6 +34,7 @@ component pneum_res
         w = {0,'mm'}; %Width
         l = {10,'mm'}; %Length
         dist_to_cent = {10,'mm'}; %Distance to center
+        theta = {pi/2,'1'}; %Contact angle
     end
     parameters (Access = private)
         r = {0,'mm'};
@@ -42,6 +44,7 @@ component pneum_res
         V_total = {0,'mm^3'};
         Area = {1,'mm^2'};
         p_vap = {2329.575349457,'Pa'};
+        gamma_lg = {0.07275,'Pa*m'};
     end
     function setup
         across(p,I.p);
@@ -84,9 +87,11 @@ component pneum_res
                     p_Euler.der == EP*(-(G+1)*0.5*(I.density*w*2*pi*r)*f_dot*(fill/Euler_fill)-p_Euler);
                 end
             end
+            p_cap == gamma_lg*(((2*cos(theta))/w)+((2*cos(theta))/d));
         else
             p_pneum == p0*(V_total/(V_total-V_liquid))-p0;
             p_Euler.der == -EP*p_Euler;
+            p_cap == 0;
         end
         
         if (inp>1) && (fill<1) && (q>0)
