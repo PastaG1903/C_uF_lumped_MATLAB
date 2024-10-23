@@ -114,7 +114,7 @@ component pneum_res
         if l>0
           p + p_cent + p_Euler + p_cap == p_pneum;
         else
-          p == p_pneum + p_cent + p_Euler ;
+          p + p_Euler + p_cap == p_pneum + p_cent;
         end
     end
 end

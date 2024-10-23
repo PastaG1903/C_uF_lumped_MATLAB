@@ -39,13 +39,11 @@ component vented_chamber
         p0 = {101325,'Pa'};
         Euler_fill = {0.1,'1'};
         EP = {100,'1/s'};
-        Area = {1,'mm^2'};
     end
     function setup
         across(p,I.p,[]);
         through(q,I.q,[]);
         V_total = w*d*l;
-        Area = w*d;
         r = l+dist_to_cent;
         if init_fill >=1
             fill = 1;
