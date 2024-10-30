@@ -29,12 +29,12 @@ component vented_chamber
         G = {0,'1'}; %Azimuthal position of the outlet
         init_fill = {0,'1'}; %Initial fill
         d = {0,'mm'}; %Depth
-        w = {0,'mm'}; %Width
-        l = {10,'mm'}; %Length
-        dist_to_cent = {10,'mm'}; %Distance to center
+        anglength = {0,'1'}; %Angle of aperture
+        r = {10,'mm'}; %Inner Radius
+        R = {10,'mm'}; %Outer Radius
     end
     parameters (Access = private)
-        r = {0,'mm'};
+        Area = {0,'mm^3'};
         V_total = {0,'mm^3'};
         p0 = {101325,'Pa'};
         Euler_fill = {0.1,'1'};
@@ -43,8 +43,8 @@ component vented_chamber
     function setup
         across(p,I.p,[]);
         through(q,I.q,[]);
-        V_total = w*d*l;
-        r = l+dist_to_cent;
+        Area = anglength*(pi/360)*(R^2-r^2)
+        V_total = Area*d;
         if init_fill >=1
             fill = 1;
             V_liquid = V_total;
@@ -59,8 +59,8 @@ component vented_chamber
     equations
         fill == V_liquid/V_total;
         f.der == f_dot;
-        h_liquid == l*fill;
-        p_cent == 0.5*I.density*(r^2-(r-h_liquid)^2)*(2*pi*f)^2 + 0.5*I.density_gas*((r-h_liquid)^2-dist_to_cent^2)*(2*pi*f)^2;
+        h_liquid == sqrt(R^2-V_liquid*360/d/anglength/pi);
+        p_cent == 0.5*I.density*(R^2-(R-h_liquid)^2)*(2*pi*f)^2 + 0.5*I.density_gas*((r+h_liquid)^2-r^2)*(2*pi*f)^2;
         if V_liquid > 0
             if f_dot > 0
                 if fill > Euler_fill

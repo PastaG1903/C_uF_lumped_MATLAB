@@ -38,7 +38,7 @@ component n_isoradial_channel
     parameters
         w = {106, 'um'}; %Width
         d = {100, 'um'}; %Depth
-        l = {100,'mm'}; %Length
+        anglength = {100,'1'}; %Aperture angle
         r = {20, 'mm'}; %Radial distance to channel
         init_fill = {0, '1'}; %Initial fill level
         theta = {pi/2,'1'}; %Contact angle
@@ -54,6 +54,7 @@ component n_isoradial_channel
     function setup
         across(p,I.p,O.p);
         through(q,I.q,O.q);
+        l = 2*pi*r*anglength/360;
         V_total = w*d*l;
         Area = w*d;
         fluidic_res_liq = 28.4*O.viscosity*l/(w^2*d^2);
