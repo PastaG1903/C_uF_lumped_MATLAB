@@ -30,12 +30,13 @@ component vented_chamber
         init_fill = {0,'1'}; %Initial fill
         d = {0,'mm'}; %Depth
         anglength = {0,'1'}; %Angle of aperture
-        r = {10,'mm'}; %Inner Radius
-        R = {10,'mm'}; %Outer Radius
+        InRad = {10,'mm'}; %Inner Radius
+        OutRad = {10,'mm'}; %Outer Radius
     end
     parameters (Access = private)
-        Area = {0,'mm^3'};
+        Area = {0,'mm^2'};
         V_total = {0,'mm^3'};
+        w = {0,'mm'};
         p0 = {101325,'Pa'};
         Euler_fill = {0.1,'1'};
         EP = {100,'1/s'};
@@ -43,7 +44,8 @@ component vented_chamber
     function setup
         across(p,I.p,[]);
         through(q,I.q,[]);
-        Area = anglength*(pi/360)*(R^2-r^2)
+        w = 2*pi*InRad*anglength/360;
+        Area = anglength*(pi/360)*(OutRad^2-InRad^2)
         V_total = Area*d;
         if init_fill >=1
             fill = 1;
@@ -59,20 +61,20 @@ component vented_chamber
     equations
         fill == V_liquid/V_total;
         f.der == f_dot;
-        h_liquid == sqrt(R^2-V_liquid*360/d/anglength/pi);
-        p_cent == 0.5*I.density*(R^2-(R-h_liquid)^2)*(2*pi*f)^2 + 0.5*I.density_gas*((r+h_liquid)^2-r^2)*(2*pi*f)^2;
+        h_liquid == sqrt(OutRad^2-V_liquid*360/d/anglength/pi);
+        p_cent == 0.5*I.density*(OutRad^2-(OutRad-h_liquid)^2)*(2*pi*f)^2 + 0.5*I.density_gas*((InRad+h_liquid)^2-InRad^2)*(2*pi*f)^2;
         if V_liquid > 0
             if f_dot > 0
                 if fill > Euler_fill
-                    p_Euler.der == EP*(-(G-1)*0.5*(I.density*w*2*pi*r)*f_dot-p_Euler);
+                    p_Euler.der == EP*(-(G-1)*0.5*(I.density*w*2*pi*InRad)*f_dot-p_Euler);
                 else
-                    p_Euler.der == EP*(-(G-1)*0.5*(I.density*w*2*pi*r)*f_dot*(fill/Euler_fill)-p_Euler);
+                    p_Euler.der == EP*(-(G-1)*0.5*(I.density*w*2*pi*InRad)*f_dot*(fill/Euler_fill)-p_Euler);
                 end
             else
                 if fill > Euler_fill
-                    p_Euler.der == EP*(-(G+1)*0.5*(I.density*w*2*pi*r)*f_dot-p_Euler);
+                    p_Euler.der == EP*(-(G+1)*0.5*(I.density*w*2*pi*InRad)*f_dot-p_Euler);
                 else
-                    p_Euler.der == EP*(-(G+1)*0.5*(I.density*w*2*pi*r)*f_dot*(fill/Euler_fill)-p_Euler);
+                    p_Euler.der == EP*(-(G+1)*0.5*(I.density*w*2*pi*InRad)*f_dot*(fill/Euler_fill)-p_Euler);
                 end
             end
         else

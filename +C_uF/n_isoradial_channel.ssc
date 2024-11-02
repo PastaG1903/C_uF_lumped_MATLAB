@@ -47,6 +47,7 @@ component n_isoradial_channel
     parameters (Access = private)
         V_total = {0, 'mm^3'};
         Area = {1,'mm^2'};
+        l = {0,'mm'}; %Arc lenght of the channel
         fluidic_res_liq = {0,'Pa*s/mm^3'};
         fluidic_res_air = {0,'Pa*s/mm^3'};
         gamma_lg = {0.07275,'Pa*m'};
